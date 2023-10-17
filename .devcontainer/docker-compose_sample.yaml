@@ -4,8 +4,9 @@ services:
   dev_anomalib_server:
     ######
     # xxxx -> username of docker account
+    # yyyy -> tag of image
     ######
-    image: xxxx/anomalib070-python310-cudnn8-devel-ubuntu22.04:v1.0.0
+    image: xxxx/anomalib070-python310-cudnn8-devel-ubuntu22.04:yyyy
     container_name: container_dev_anomalib
     # For jupyter
     ports:

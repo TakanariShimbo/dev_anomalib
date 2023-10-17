@@ -14,7 +14,9 @@
 2. Create docker-compose.yaml  
     ```
     .devcontainer の docker-compose_sample.yaml を docker-compose.yaml という名前で複製する  
-    docker-compose.yaml 内の xxxx も 1.Build Image 同様にDockerアカウントのユーザ名に変更する  
+    docker-compose.yaml を編集する
+    xxxx: Dockerアカウントのユーザ名
+    yyyy: 現在のImageのバージョン ex v1.0.2
     ```
 
 # DevContainer の利用開始
