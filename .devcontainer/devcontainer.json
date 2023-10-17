@@ -1,0 +1,12 @@
+{
+  "name": "Dev Anomalib",
+  "dockerComposeFile": ["docker-compose.yaml"],
+  "service": "dev_anomalib_server",
+  "extensions": [
+    "ms-python.black-formatter",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "oderwat.indent-rainbow",
+  ],
+  "workspaceFolder": "/root/work",
+}

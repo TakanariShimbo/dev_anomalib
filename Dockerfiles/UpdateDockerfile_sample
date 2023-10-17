@@ -1,0 +1,11 @@
+# xxxx: username
+# yyyy: tag
+FROM xxxx/anomalib070-python310-cudnn8-devel-ubuntu22.04:yyyy
+
+# SH -> BASH
+SHELL ["/bin/bash", "-c"]
+
+# write add librarys below
+# zzzz: libraryname
+# RUN pip install zzzz1
+# RUN pip install zzzz2
