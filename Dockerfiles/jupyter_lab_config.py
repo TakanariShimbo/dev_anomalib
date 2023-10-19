@@ -1144,7 +1144,6 @@ c = get_config()  #noqa
 # c.ServerApp.websocket_url = ''
 
 c.ServerApp.ip = "0.0.0.0"
-c.ServerApp.port = 8889
 c.ServerApp.token = ""
 c.ServerApp.open_browser = False
 c.ServerApp.allow_root = True

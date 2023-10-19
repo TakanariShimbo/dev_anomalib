@@ -30,7 +30,7 @@
     # VS Code の場合はそのまま開発開始
     
     # jupyter の場合は以下コマンド実行
-    jupyter lab --ip 0.0.0.0 --no-browser --allow-root
+    jupyter lab
     ```
 
 # イメージの更新
