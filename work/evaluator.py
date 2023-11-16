@@ -11,6 +11,7 @@ from preds_holder import PredsHolder
 class Evaluator:
     def __init__(self, preds_holder: PredsHolder) -> None:
         self.__df = preds_holder.dataframe
+        self.__threshold = preds_holder.threshold
     
     def show_hist(self):
         bins, good_preds, bad_preds = self.__calcu_for_hist(df=self.__df)
@@ -19,6 +20,7 @@ class Evaluator:
         
         plt.hist(good_preds, bins=bins, alpha=0.5, label='Good', color='green', edgecolor='black', rwidth=0.8)
         plt.hist(bad_preds, bins=bins, alpha=0.5, label='Bad', color='red', edgecolor='black', rwidth=0.8)
+        plt.axvline(self.__threshold, color='k', linestyle='dashed', linewidth=1)
 
         plt.xlabel('Predictions')
         plt.ylabel('Frequency')
@@ -34,6 +36,7 @@ class Evaluator:
 
         plt.plot(x_values, bad_pdf, label='Good', color='green')
         plt.plot(x_values, good_pdf, label='Bad', color='red')
+        plt.axvline(self.__threshold, color='k', linestyle='dashed', linewidth=1)
         
         plt.ylim(bottom=0)
         plt.xlabel('Predictions')
@@ -53,7 +56,8 @@ class Evaluator:
         # Hist
         ax1.hist(good_preds, bins=bins, alpha=0.5, label='Good Hist', color='green', edgecolor='black', rwidth=0.8)
         ax1.hist(bad_preds, bins=bins, alpha=0.5, label='Bad Hist', color='red', edgecolor='black', rwidth=0.8)
-        
+        ax1.axvline(self.__threshold, color='k', linestyle='dashed', linewidth=1)
+
         ax1.set_xlabel('Predictions')
         ax1.set_ylabel('Frequency', color='blue')
         ax1.tick_params(axis='y', labelcolor='blue')
