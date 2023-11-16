@@ -5,7 +5,9 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, List
+
+import pandas as pd
 
 import pytorch_lightning as pl
 import torch
@@ -17,9 +19,66 @@ from anomalib.post_processing.normalization.min_max import normalize
 from anomalib.utils.metrics import MinMax
 
 
+class PredsHolder:    
+    def __init__(self) -> None:
+        self.__IMAGE_PATH_COLUMN = "image_path"
+        self.__PRED_COLUMN = "pred"
+        self.__NORM_PRED_COLUMN = "norm_pred"
+        self.__threshold = 0.0
+        self.__min = 0.0
+        self.__max = 0.0
+        self.__df = pd.DataFrame(columns=[self.__IMAGE_PATH_COLUMN, self.__PRED_COLUMN, self.__NORM_PRED_COLUMN])
+    
+    def reset(self):
+        self.__df = pd.DataFrame(columns=[self.__IMAGE_PATH_COLUMN, self.__PRED_COLUMN, self.__NORM_PRED_COLUMN])
+
+    def add(self, image_path: str, pred: float, norm_pred: float) -> None:
+        new_row = pd.DataFrame({
+            self.__IMAGE_PATH_COLUMN: [image_path],
+            self.__PRED_COLUMN: [pred],
+            self.__NORM_PRED_COLUMN: [norm_pred]
+        })
+        self.__df = pd.concat([self.__df, new_row], ignore_index=True)
+
+    def add_multiple(self, image_paths: List[str], preds: torch.tensor, norm_preds: torch.tensor) -> None:
+        preds = preds.tolist()
+        norm_preds = norm_preds.tolist()
+
+        if not (len(image_paths) == len(preds) == len(norm_preds)):
+            raise ValueError("All lists must be of the same length.")
+
+        for image_path, pred, norm_pred in zip(image_paths, preds, norm_preds):
+            self.add(image_path, pred, norm_pred)
+    
+    def set_thresholds(self, threshold: torch.Tensor, min_val: torch.Tensor, max_val: torch.Tensor) -> None:
+        self.__threshold = threshold.item()
+        self.__min = min_val.item()
+        self.__max = max_val.item()
+        
+    @property
+    def dataframe(self) -> pd.DataFrame:
+        return self.__df
+    
+    @property
+    def threshold(self) -> float:
+        return self.__threshold
+
+    @property
+    def min(self) -> float:
+        return self.__min
+
+    @property
+    def max(self) -> float:
+        return self.__max
+
+
 class MinMaxNormalizationCallback(Callback):
     """Callback that normalizes the image-level and pixel-level anomaly scores using min-max normalization."""
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__preds_holder = PredsHolder()
+    
     def setup(self, trainer: pl.Trainer, pl_module: AnomalyModule, stage: str | None = None) -> None:
         """Adds min_max metrics to normalization metrics."""
         del trainer, stage  # These variables are not used.
@@ -88,16 +147,33 @@ class MinMaxNormalizationCallback(Callback):
 
         self._normalize_batch(outputs, pl_module)
 
-    @staticmethod
-    def _normalize_batch(outputs, pl_module) -> None:
+    def _normalize_batch(self, outputs, pl_module) -> None:
         """Normalize a batch of predictions."""
         image_threshold = pl_module.image_threshold.value.cpu()
         pixel_threshold = pl_module.pixel_threshold.value.cpu()
         stats = pl_module.normalization_metrics.cpu()
-        outputs["pred_scores"] = normalize(outputs["pred_scores"], image_threshold, stats.min, stats.max)
+
+        preds = outputs["pred_scores"]
+        norm_preds = normalize(preds, image_threshold, stats.min, stats.max)
+        outputs["pred_scores"] = norm_preds
+
+        self.__preds_holder.add_multiple(
+            image_paths=outputs["image_path"],
+            preds=preds,
+            norm_preds=norm_preds,
+        )
+        self.__preds_holder.set_thresholds(
+            threshold=image_threshold,
+            min_val=stats.min,
+            max_val=stats.max
+        )
+
         if "anomaly_maps" in outputs:
             outputs["anomaly_maps"] = normalize(outputs["anomaly_maps"], pixel_threshold, stats.min, stats.max)
         if "box_scores" in outputs:
             outputs["box_scores"] = [
                 normalize(scores, pixel_threshold, stats.min, stats.max) for scores in outputs["box_scores"]
             ]
+
+    def get_preds_holder(self) -> PredsHolder:
+        return self.__preds_holder
