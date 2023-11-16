@@ -34,7 +34,6 @@
     # xxxx -> Dockerアカウントのユーザ名
     # yyyy -> 更新後のImageのバージョン ex v1.0.3
     docker build -f ./Dockerfiles/UpdateDockerfile -t xxxx/anomalib070-python310-cudnn8-devel-ubuntu22.04:yyyy .
-    docker build -f ./Dockerfiles/UpdateDockerfile -t uttechcenter/anomalib070-python310-cudnn8-devel-ubuntu22.04:v3.0.0 .
     ```
 
 3. Modify docker-compose.yaml  
