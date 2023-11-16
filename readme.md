@@ -19,20 +19,6 @@
     yyyy: 現在のImageのバージョン ex v1.0.2
     ```
 
-# DevContainer の利用開始
-1. コンテナを起動しターミナルに入る
-    ```
-    # VS Code の左下の><をクリックし、コンテナで再度開くを選択
-    ```
-
-2. 利用開始
-    ```
-    # VS Code の場合はそのまま開発開始
-    
-    # jupyter の場合は以下コマンド実行
-    jupyter lab
-    ```
-
 # イメージの更新
 1. Edit Dockerfile
     ```
@@ -55,6 +41,20 @@
     docker-compose.yaml 内の image のタグをビルドしたバージョンに変更する
     ```
 
+# DevContainer の利用開始
+1. コンテナを起動しターミナルに入る
+    ```
+    # VS Code の左下の><をクリックし、コンテナで再度開くを選択
+    ```
+
+2. 利用開始
+    ```
+    # VS Code の場合はそのまま開発開始
+    
+    # jupyter の場合は以下コマンド実行
+    jupyter lab
+    ```
+    
 # コマンドメモ
 ```
 docker-compose up -d
