@@ -19,36 +19,52 @@ from anomalib.post_processing.normalization.min_max import normalize
 from anomalib.utils.metrics import MinMax
 
 
-class PredsHolder:    
+class PredsHolder:
     def __init__(self) -> None:
         self.__IMAGE_PATH_COLUMN = "image_path"
         self.__PRED_COLUMN = "pred"
-        self.__NORM_PRED_COLUMN = "norm_pred"
+        self.__PRED_NORM_COLUMN = "pred_norm"
+        self.__PRED_LABEL_COLUMN = "pred_label"
+        self.__LABEL_COLUMN = "label"
         self.__threshold = 0.0
         self.__min = 0.0
         self.__max = 0.0
-        self.__df = pd.DataFrame(columns=[self.__IMAGE_PATH_COLUMN, self.__PRED_COLUMN, self.__NORM_PRED_COLUMN])
-    
+        # Adding the new columns to the DataFrame
+        self.__df = pd.DataFrame(columns=[
+            self.__IMAGE_PATH_COLUMN, 
+            self.__PRED_COLUMN, 
+            self.__PRED_NORM_COLUMN, 
+            self.__PRED_LABEL_COLUMN, 
+            self.__LABEL_COLUMN
+        ])
+
     def reset(self):
-        self.__df = pd.DataFrame(columns=[self.__IMAGE_PATH_COLUMN, self.__PRED_COLUMN, self.__NORM_PRED_COLUMN])
+        self.__df = pd.DataFrame(columns=[
+            self.__IMAGE_PATH_COLUMN, 
+            self.__PRED_COLUMN, 
+            self.__PRED_NORM_COLUMN, 
+            self.__PRED_LABEL_COLUMN, 
+            self.__LABEL_COLUMN
+        ])
 
-    def add(self, image_path: str, pred: float, norm_pred: float) -> None:
-        new_row = pd.DataFrame({
-            self.__IMAGE_PATH_COLUMN: [image_path],
-            self.__PRED_COLUMN: [pred],
-            self.__NORM_PRED_COLUMN: [norm_pred]
-        })
-        self.__df = pd.concat([self.__df, new_row], ignore_index=True)
-
-    def add_multiple(self, image_paths: List[str], preds: torch.tensor, norm_preds: torch.tensor) -> None:
+    def add_multiple(self, image_paths: List[str], preds: torch.tensor, pred_norms: torch.tensor, pred_labels: torch.tensor, labels: torch.tensor) -> None:
         preds = preds.tolist()
-        norm_preds = norm_preds.tolist()
+        pred_norms = pred_norms.tolist()
+        pred_labels = pred_labels.tolist()
+        labels = labels.tolist()
 
-        if not (len(image_paths) == len(preds) == len(norm_preds)):
+        if not (len(image_paths) == len(preds) == len(pred_norms) == len(pred_labels) == len(labels)):
             raise ValueError("All lists must be of the same length.")
 
-        for image_path, pred, norm_pred in zip(image_paths, preds, norm_preds):
-            self.add(image_path, pred, norm_pred)
+        new_rows = pd.DataFrame({
+            self.__IMAGE_PATH_COLUMN: image_paths,
+            self.__PRED_COLUMN: preds,
+            self.__PRED_NORM_COLUMN: pred_norms,
+            self.__PRED_LABEL_COLUMN: pred_labels,
+            self.__LABEL_COLUMN: labels
+        })
+
+        self.__df = pd.concat([self.__df, new_rows], ignore_index=True)
     
     def set_thresholds(self, threshold: torch.Tensor, min_val: torch.Tensor, max_val: torch.Tensor) -> None:
         self.__threshold = threshold.item()
@@ -57,6 +73,7 @@ class PredsHolder:
         
     @property
     def dataframe(self) -> pd.DataFrame:
+        self.__df[self.__PRED_LABEL_COLUMN] = self.__df[self.__PRED_LABEL_COLUMN].astype(int)
         return self.__df
     
     @property
@@ -70,6 +87,7 @@ class PredsHolder:
     @property
     def max(self) -> float:
         return self.__max
+
 
 
 class MinMaxNormalizationCallback(Callback):
@@ -160,7 +178,9 @@ class MinMaxNormalizationCallback(Callback):
         self.__preds_holder.add_multiple(
             image_paths=outputs["image_path"],
             preds=preds,
-            norm_preds=norm_preds,
+            pred_norms=norm_preds,
+            pred_labels=outputs["pred_labels"],
+            labels=outputs["label"],
         )
         self.__preds_holder.set_thresholds(
             threshold=image_threshold,
