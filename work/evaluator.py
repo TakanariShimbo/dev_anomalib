@@ -5,10 +5,12 @@ import pandas as pd
 from scipy import stats 
 import matplotlib.pyplot as plt
 
+from preds_holder import PredsHolder
+
 
 class Evaluator:
-    def __init__(self, df: pd.DataFrame) -> None:
-        self.__df = df
+    def __init__(self, preds_holder: PredsHolder) -> None:
+        self.__df = preds_holder.dataframe
     
     def show_hist(self):
         bins, good_preds, bad_preds = self.__calcu_for_hist(df=self.__df)
