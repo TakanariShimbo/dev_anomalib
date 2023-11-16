@@ -17,7 +17,7 @@ class Evaluator:
     def constrant_using_preds_holder(cls, preds_holder: PredsHolder) -> "Evaluator":
         return cls(df=preds_holder.dataframe, threshold=preds_holder.threshold)
     
-    def show_hist(self):
+    def show_hist(self, save_path=None):
         bins, good_preds, bad_preds = self.__calcu_for_hist(df=self.__df)
         
         plt.figure()
@@ -31,9 +31,12 @@ class Evaluator:
 
         plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
         plt.title('Histogram of Predictions')
+
+        if save_path:
+            plt.savefig(f"{save_path}/hist.png", bbox_inches='tight')
         plt.show()
 
-    def show_pdf(self):
+    def show_pdf(self, save_path=None):
         x_values, good_pdf, bad_pdf = self.__calcu_for_pdf(df=self.__df)
 
         plt.figure()
@@ -48,9 +51,12 @@ class Evaluator:
 
         plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
         plt.title('Probability Density Function of Predictions')
+
+        if save_path:
+            plt.savefig(f"{save_path}/pdf.png", bbox_inches='tight')
         plt.show()
 
-    def show_hist_and_pdf(self):
+    def show_hist_and_pdf(self, save_path=None):
         bins, good_preds, bad_preds = self.__calcu_for_hist(df=self.__df)
         x_values, good_pdf, bad_pdf = self.__calcu_for_pdf(df=self.__df)
 
@@ -79,6 +85,9 @@ class Evaluator:
         ax1.legend(loc='center left', bbox_to_anchor=(1.2, 0.6))
         ax2.legend(loc='center left', bbox_to_anchor=(1.2, 0.4))
         plt.title('Histogram and Probability Density Function of Predictions')
+
+        if save_path:
+            plt.savefig(f"{save_path}/hist_and_pdf.png", bbox_inches='tight')
         plt.show()
 
     @staticmethod
