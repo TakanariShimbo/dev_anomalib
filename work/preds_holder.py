@@ -23,15 +23,6 @@ class PredsHolder:
             self.__LABEL_COLUMN
         ])
 
-    def reset(self):
-        self.__df = pd.DataFrame(columns=[
-            self.__IMAGE_PATH_COLUMN, 
-            self.__PRED_COLUMN, 
-            self.__PRED_NORM_COLUMN, 
-            self.__PRED_LABEL_COLUMN, 
-            self.__LABEL_COLUMN
-        ])
-
     def add_multiple(self, image_paths: List[str], preds: torch.tensor, pred_norms: torch.tensor, pred_labels: torch.tensor, labels: torch.tensor) -> None:
         preds = preds.tolist()
         pred_norms = pred_norms.tolist()
