@@ -85,8 +85,8 @@ class Evaluator:
         good_df = df[df['label'] == 0]
         bad_df = df[df['label'] == 1]
 
-        bad_mean, bad_std = self.__get_mena_and_std(values=good_df['pred'].values)
-        good_mean, good_std = self.__get_mena_and_std(values=bad_df['pred'].values)
+        good_mean, good_std = self.__get_mena_and_std(values=good_df['pred'].values)
+        bad_mean, bad_std = self.__get_mena_and_std(values=bad_df['pred'].values)
         x_values = np.linspace(min(df['pred']), max(df['pred']), 100)
 
         bad_pdf = stats.norm.pdf(x_values, bad_mean, bad_std)
