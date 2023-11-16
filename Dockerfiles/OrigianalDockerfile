@@ -36,7 +36,7 @@ RUN pip install --upgrade setuptools
 RUN pip install jupyter
 RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 RUN pip install anomalib==0.7.0
-RUN pip uninstall anomalib
+RUN pip uninstall anomalib -y
 
 # copy jupyter_lab_config.py
 COPY ./Dockerfiles/jupyter_lab_config.py /root/.jupyter/jupyter_lab_config.py
