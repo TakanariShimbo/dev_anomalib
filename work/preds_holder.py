@@ -23,7 +23,7 @@ class PredsHolder:
             self.__LABEL_COLUMN
         ])
 
-    def add_multiple(self, image_paths: List[str], preds: torch.tensor, pred_norms: torch.tensor, pred_labels: torch.tensor, labels: torch.tensor) -> None:
+    def add_multiple(self, image_paths: List[str], preds: torch.Tensor, pred_norms: torch.Tensor, pred_labels: torch.Tensor, labels: torch.Tensor) -> None:
         preds = preds.tolist()
         pred_norms = pred_norms.tolist()
         pred_labels = pred_labels.tolist()
