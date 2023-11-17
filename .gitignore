@@ -3,3 +3,4 @@ Dokcerfiles/UpdateDockerfile
 .ipynb_checkpoints
 work/datasets/*
 work/results/*
+__pycache__
