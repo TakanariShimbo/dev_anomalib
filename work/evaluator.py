@@ -107,28 +107,28 @@ class Evaluator:
         df = pd.DataFrame(
             {
                 "": [
-                    "Label Positive",
-                    "Label Negative",
+                    f"Label Positive = {TP+FN}",
+                    f"Label Negative = {TN+FP}",
                     "Metrics Other",
                 ],
-                "Pred Positive": [
-                    f"TP={TP}",
-                    f"FP={FP}",
+                f"Pred Positive = {TP+FP}": [
+                    f"TP = {TP}",
+                    f"FP = {FP}",
                     f"Precision = {precision:.2f}",
                 ],
-                "Pred Negative": [
-                    f"FN={FN}",
-                    f"TN={TN}",
+                f"Pred Negative = {TN+FN}": [
+                    f"FN = {FN}",
+                    f"TN = {TN}",
                     "",
                 ],
                 "Metrics True Rate": [
-                    f"TPR={TPR:.2f}",
-                    f"TNR={TNR:.2f}",
-                    f"Accuracy={accuracy:.2f}",
+                    f"TPR = {TPR:.2f}",
+                    f"TNR = {TNR:.2f}",
+                    f"Accuracy = {accuracy:.2f}",
                 ],
                 "Metrics False Rate": [
-                    f"FNR={FNR:.2f}",
-                    f"FPR={FPR:.2f}",
+                    f"FNR = {FNR:.2f}",
+                    f"FPR = {FPR:.2f}",
                     "",
                 ],
                 "Metrics Other": [
