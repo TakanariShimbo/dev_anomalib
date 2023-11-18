@@ -109,7 +109,8 @@ class Evaluator:
         recall = TPR
         specificity = TNR
         accuracy = (TP + TN) / (TP + FP + FN + TN)
-        F1 = 2 * (precision * recall) / (precision + recall)
+        f1 = 2 * (precision * recall) / (precision + recall)
+        mcc = (TP * TN - FP * FN) / ((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))**(1/2)
 
         df = pd.DataFrame(
             {
@@ -136,12 +137,12 @@ class Evaluator:
                 "Metrics False Rate": [
                     f"FNR = {FNR:.2f}",
                     f"FPR = {FPR:.2f}",
-                    f"MCC = {(TP * TN - FP * FN) / ((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))**(1/2):.2f}",
+                    f"MCC = {mcc:.2f}",
                 ],
                 "Metrics Other": [
                     f"Recall = {recall:.2f}",
                     f"Specificity = {specificity:.2f}",
-                    f"F1 = {F1:.2f}",
+                    f"F1 = {f1:.2f}",
                 ],
             }
         ).set_index("")
