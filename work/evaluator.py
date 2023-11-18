@@ -18,12 +18,12 @@ class Evaluator:
         return cls(df=preds_holder.dataframe, threshold=preds_holder.threshold)
 
     def show_hist(self, save_path=None):
-        bins, good_preds, bad_preds = self.__calcu_for_hist(df=self.__df)
+        bins, negative_preds, positive_preds = self.__calcu_for_hist(df=self.__df)
 
         plt.figure()
 
-        plt.hist(good_preds, bins=bins, alpha=0.5, label="True Negative", color="green", edgecolor="black", rwidth=0.8)
-        plt.hist(bad_preds, bins=bins, alpha=0.5, label="True Positive", color="red", edgecolor="black", rwidth=0.8)
+        plt.hist(negative_preds, bins=bins, alpha=0.5, label="Pred Negative Hist", color="green", edgecolor="black", rwidth=0.8)
+        plt.hist(positive_preds, bins=bins, alpha=0.5, label="Pred Positive Hist", color="red", edgecolor="black", rwidth=0.8)
         plt.axvline(self.__threshold, color="k", linestyle="dashed", linewidth=1)
 
         plt.xlabel("Predictions")
@@ -37,13 +37,13 @@ class Evaluator:
         plt.show()
 
     def show_pdf(self, save_path=None):
-        x_values, good_pdf, bad_pdf = self.__calcu_for_pdf(df=self.__df)
+        x_values, negative_pdf, positive_pdf = self.__calcu_for_pdf(df=self.__df)
 
         plt.figure()
 
-        plt.plot(x_values, bad_pdf, label="True Negative", color="green")
-        plt.plot(x_values, good_pdf, label="True Positive", color="red")
-        plt.axvline(self.__threshold, color="k", linestyle="dashed", linewidth=1)
+        plt.plot(x_values, negative_pdf, label="Pred Negative PDF", color="green")
+        plt.plot(x_values, positive_pdf, label="Pred Positive PDF", color="red")
+        plt.axvline(self.__threshold, color="gray", linestyle="dashed", linewidth=1)
 
         plt.ylim(bottom=0)
         plt.xlabel("Predictions")
@@ -57,15 +57,15 @@ class Evaluator:
         plt.show()
 
     def show_hist_and_pdf(self, save_path=None):
-        bins, good_preds, bad_preds = self.__calcu_for_hist(df=self.__df)
-        x_values, good_pdf, bad_pdf = self.__calcu_for_pdf(df=self.__df)
+        bins, negative_preds, positive_preds = self.__calcu_for_hist(df=self.__df)
+        x_values, negative_pdf, positive_pdf = self.__calcu_for_pdf(df=self.__df)
 
         # Create a figure and a set of subplots
         _, ax1 = plt.subplots()
 
         # Hist
-        ax1.hist(good_preds, bins=bins, alpha=0.5, label="True Negative Hist", color="green", edgecolor="black", rwidth=0.8)
-        ax1.hist(bad_preds, bins=bins, alpha=0.5, label="True Positive Hist", color="red", edgecolor="black", rwidth=0.8)
+        ax1.hist(negative_preds, bins=bins, alpha=0.5, label="Pred Negative Hist", color="green", edgecolor="black", rwidth=0.8)
+        ax1.hist(positive_preds, bins=bins, alpha=0.5, label="Pred Positive Hist", color="red", edgecolor="black", rwidth=0.8)
         ax1.axvline(self.__threshold, color="k", linestyle="dashed", linewidth=1)
 
         ax1.set_xlabel("Predictions")
@@ -74,8 +74,8 @@ class Evaluator:
 
         # PDF
         ax2 = ax1.twinx()
-        ax2.plot(x_values, bad_pdf, label="True Negative PDF", color="green", linestyle="dashed")
-        ax2.plot(x_values, good_pdf, label="True Positive PDF", color="red", linestyle="dashed")
+        ax2.plot(x_values, negative_pdf, label="Pred Negative PDF", color="green", linestyle="dashed")
+        ax2.plot(x_values, positive_pdf, label="Pred Positive PDF", color="red", linestyle="dashed")
 
         ax2.set_ylim(bottom=0)
         ax2.set_ylabel("Probability Density Function", color="purple")
@@ -93,20 +93,49 @@ class Evaluator:
     def show_confusion_matrix_and_metrics(self, save_path=None) -> pd.DataFrame:
         TP, TN, FP, FN = self.__culcu_for_confusion_matrix_and_metrics(df=self.__df)
 
-        # Calculate FPR, FNR, TPR, TNR, and Accuracy
-        FPR = FP / (TP + FP)
-        FNR = FN / (FN + TP)
+        # Calculate metrics
         TPR = TP / (TP + FN)
         TNR = TN / (TN + FP)
-        Accuracy = (TP + TN) / (TP + FP + FN + TN)
+        FPR = 1.0 - TNR
+        FNR = 1.0 - TPR
+        precision = TP / (TP + FP)
+        recall = TPR
+        specificity = TNR
+        accuracy = (TP + TN) / (TP + FP + FN + TN)
+        F1 = 2 * (precision * recall) / (precision + recall)
 
-        # Create the DataFrame
         df = pd.DataFrame(
             {
-                "": ["Label Positive", "Label Negative", "False Rates"],
-                "Pred Positive": [f"TP={TP}", f"FP={FP}", f"FPR={FPR:.2f}"],
-                "Pred Negative": [f"FN={FN}", f"TN={TN}", f"FNR={FNR:.2f}"],
-                "True Rates": [f"TPR={TPR:.2f}", f"TNR={TNR:.2f}", f"Accuracy={Accuracy:.2f}"],
+                "": [
+                    "Label Positive",
+                    "Label Negative",
+                    "Metrics Other",
+                ],
+                "Pred Positive": [
+                    f"TP={TP}",
+                    f"FP={FP}",
+                    f"Precision = {precision:.2f}",
+                ],
+                "Pred Negative": [
+                    f"FN={FN}",
+                    f"TN={TN}",
+                    "",
+                ],
+                "Metrics True Rate": [
+                    f"TPR={TPR:.2f}",
+                    f"TNR={TNR:.2f}",
+                    f"Accuracy={accuracy:.2f}",
+                ],
+                "Metrics False Rate": [
+                    f"FNR={FNR:.2f}",
+                    f"FPR={FPR:.2f}",
+                    "",
+                ],
+                "Metrics Other": [
+                    f"Recall = {recall:.2f}",
+                    f"Specificity = {specificity:.2f}",
+                    f"F1 = {F1:.2f}",
+                ],
             }
         ).set_index("")
 
@@ -114,14 +143,41 @@ class Evaluator:
             df.to_csv(f"{save_path}/confusion_matrix_and_metrics_result.csv")
         return df
 
+
     @staticmethod
     def show_confusion_matrix_and_metrics_define(save_path=None) -> pd.DataFrame:
         df = pd.DataFrame(
             {
-                "": ["Label Positive", "Label Negative", "False Rates"],
-                "Pred Positive": ["True Positive (TP)", "False Positive (FP)", "FPR = FP / (TP + FP)"],
-                "Pred Negative": ["False Negative (FN)", "True Negative (TN)", "FNR = FN / (FN + TP)"],
-                "True Rates": ["TPR = TP / (TP + FN)", "TNR = TN / (TN + FP)", "Accuracy = (TP + TN) / (TP + FP + FN + TN)"],
+                "": [
+                    "Label Positive",
+                    "Label Negative",
+                    "Metrics Other",
+                ],
+                "Pred Positive": [
+                    "True Positive (TP)",
+                    "False Positive (FP)",
+                    "Precision = TP / (TP + FP)",
+                ],
+                "Pred Negative": [
+                    "False Negative (FN)",
+                    "True Negative (TN)",
+                    "",
+                ],
+                "Metrics True Rate": [
+                    "TPR = TP / (TP + FN)",
+                    "TNR = TN / (TN + FP)",
+                    "Accuracy = (TP + TN) / (TP + FP + FN + TN)",
+                ],
+                "Metrics False Rate": [
+                    "FNR = 1 - TPR",
+                    "FPR = 1 - TPR",
+                    "",
+                ],
+                "Metrics Other": [
+                    "Recall = TPR",
+                    "Specificity = TNR",
+                    "F1 = 2 * (Precision * Recall) / (Precision + Recall)",
+                ],
             }
         ).set_index("")
 
@@ -135,22 +191,26 @@ class Evaluator:
         max_pred = df["pred"].max()
         bins = np.linspace(min_pred, max_pred, 30)
 
-        good_preds = df[df["label"] == 0]["pred"].values
-        bad_preds = df[df["label"] == 1]["pred"].values
-        return bins, good_preds, bad_preds
+        negative_preds = df[df["label"] == 0]["pred"].values
+        positive_preds = df[df["label"] == 1]["pred"].values
+        return bins, negative_preds, positive_preds
 
     def __calcu_for_pdf(self, df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        good_df = df[df["label"] == 0]
-        bad_df = df[df["label"] == 1]
+        negative_df = df[df["label"] == 0]
+        positive_df = df[df["label"] == 1]
 
-        good_mean, good_std = self.__get_mean_and_std(values=good_df["pred"].values)
-        bad_mean, bad_std = self.__get_mean_and_std(values=bad_df["pred"].values)
+        total_samples = len(df)
+        weight_negative = len(negative_df) / total_samples
+        weight_positive = len(positive_df) / total_samples
+
+        negative_mean, negative_std = self.__get_mean_and_std(values=negative_df["pred"].values)
+        positive_mean, positive_std = self.__get_mean_and_std(values=positive_df["pred"].values)
         x_values = np.linspace(min(df["pred"]), max(df["pred"]), 100)
 
-        bad_pdf = stats.norm.pdf(x_values, bad_mean, bad_std)
-        good_pdf = stats.norm.pdf(x_values, good_mean, good_std)
+        negative_pdf = stats.norm.pdf(x_values, negative_mean, negative_std) * weight_negative
+        positive_pdf = stats.norm.pdf(x_values, positive_mean, positive_std) * weight_positive
 
-        return x_values, bad_pdf, good_pdf
+        return x_values, negative_pdf, positive_pdf
 
     @staticmethod
     def __culcu_for_confusion_matrix_and_metrics(df: pd.DataFrame) -> Tuple[int, int, int, int]:
