@@ -41,9 +41,16 @@ class Evaluator:
 
         plt.figure()
 
+        plt.axvline(self.__threshold, color="gray", linestyle="dashed", linewidth=1)
+
+        plt.fill_between(x_values, negative_pdf, where=(x_values <= self.__threshold), color="lightgreen", alpha=0.4, label="True Negative Area")
+        plt.fill_between(x_values, positive_pdf, where=(x_values >= self.__threshold), color="pink", alpha=0.4, label="True Positive Area")
+
+        plt.fill_between(x_values, negative_pdf, where=(x_values >= self.__threshold), color="red", alpha=0.4, label="False Positive Area")
+        plt.fill_between(x_values, positive_pdf, where=(x_values <= self.__threshold), color="green", alpha=0.4, label="False Negative Area")
+
         plt.plot(x_values, negative_pdf, label="Pred Negative PDF", color="green")
         plt.plot(x_values, positive_pdf, label="Pred Positive PDF", color="red")
-        plt.axvline(self.__threshold, color="gray", linestyle="dashed", linewidth=1)
 
         plt.ylim(bottom=0)
         plt.xlabel("Predictions")
