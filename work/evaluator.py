@@ -22,8 +22,8 @@ class Evaluator:
 
         plt.figure()
 
-        plt.hist(negative_preds, bins=bins, alpha=0.5, label="Pred Negative Hist", color="green", edgecolor="black", rwidth=0.8)
-        plt.hist(positive_preds, bins=bins, alpha=0.5, label="Pred Positive Hist", color="red", edgecolor="black", rwidth=0.8)
+        plt.hist(negative_preds, bins=bins, alpha=0.5, label="Label Negative Hist", color="green", edgecolor="black", rwidth=0.8)
+        plt.hist(positive_preds, bins=bins, alpha=0.5, label="Label Positive Hist", color="red", edgecolor="black", rwidth=0.8)
         plt.axvline(self.__threshold, color="k", linestyle="dashed", linewidth=1)
 
         plt.xlabel("Predictions")
@@ -43,14 +43,14 @@ class Evaluator:
 
         plt.axvline(self.__threshold, color="gray", linestyle="dashed", linewidth=1)
 
+        plt.plot(x_values, negative_pdf, label="Label Negative PDF", color="green")
+        plt.plot(x_values, positive_pdf, label="Label Positive PDF", color="red")
+
         plt.fill_between(x_values, negative_pdf, where=(x_values <= self.__threshold), color="lightgreen", alpha=0.4, label="True Negative Area")
         plt.fill_between(x_values, positive_pdf, where=(x_values >= self.__threshold), color="pink", alpha=0.4, label="True Positive Area")
 
         plt.fill_between(x_values, negative_pdf, where=(x_values >= self.__threshold), color="red", alpha=0.4, label="False Positive Area")
         plt.fill_between(x_values, positive_pdf, where=(x_values <= self.__threshold), color="green", alpha=0.4, label="False Negative Area")
-
-        plt.plot(x_values, negative_pdf, label="Pred Negative PDF", color="green")
-        plt.plot(x_values, positive_pdf, label="Pred Positive PDF", color="red")
 
         plt.ylim(bottom=0)
         plt.xlabel("Predictions")
@@ -71,8 +71,8 @@ class Evaluator:
         _, ax1 = plt.subplots()
 
         # Hist
-        ax1.hist(negative_preds, bins=bins, alpha=0.5, label="Pred Negative Hist", color="green", edgecolor="black", rwidth=0.8)
-        ax1.hist(positive_preds, bins=bins, alpha=0.5, label="Pred Positive Hist", color="red", edgecolor="black", rwidth=0.8)
+        ax1.hist(negative_preds, bins=bins, alpha=0.5, label="Label Negative Hist", color="green", edgecolor="black", rwidth=0.8)
+        ax1.hist(positive_preds, bins=bins, alpha=0.5, label="Label Positive Hist", color="red", edgecolor="black", rwidth=0.8)
         ax1.axvline(self.__threshold, color="k", linestyle="dashed", linewidth=1)
 
         ax1.set_xlabel("Predictions")
@@ -81,8 +81,8 @@ class Evaluator:
 
         # PDF
         ax2 = ax1.twinx()
-        ax2.plot(x_values, negative_pdf, label="Pred Negative PDF", color="green", linestyle="dashed")
-        ax2.plot(x_values, positive_pdf, label="Pred Positive PDF", color="red", linestyle="dashed")
+        ax2.plot(x_values, negative_pdf, label="Label Negative PDF", color="green", linestyle="dashed")
+        ax2.plot(x_values, positive_pdf, label="Label Positive PDF", color="red", linestyle="dashed")
 
         ax2.set_ylim(bottom=0)
         ax2.set_ylabel("Probability Density Function", color="purple")
@@ -136,7 +136,7 @@ class Evaluator:
                 "Metrics False Rate": [
                     f"FNR = {FNR:.2f}",
                     f"FPR = {FPR:.2f}",
-                    "",
+                    f"MCC = {(TP * TN - FP * FN) / ((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))**(1/2):.2f}",
                 ],
                 "Metrics Other": [
                     f"Recall = {recall:.2f}",
@@ -178,7 +178,7 @@ class Evaluator:
                 "Metrics False Rate": [
                     "FNR = 1 - TPR",
                     "FPR = 1 - TPR",
-                    "",
+                    "MCC = (TP * TN - FP * FN) / sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))",
                 ],
                 "Metrics Other": [
                     "Recall = TPR",
