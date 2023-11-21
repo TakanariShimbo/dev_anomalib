@@ -42,16 +42,16 @@ class Evaluator:
 
         plt.hist(self.__negative_preds, bins=self.__bins, alpha=0.5, label="Label Negative Hist", color="green", edgecolor="black", rwidth=0.8)
         plt.hist(self.__positive_preds, bins=self.__bins, alpha=0.5, label="Label Positive Hist", color="red", edgecolor="black", rwidth=0.8)
-        plt.axvline(self.threshold, color="k", linestyle="dashed", linewidth=1)
+        plt.axvline(self.threshold, color="gray", linestyle="dashed", linewidth=1)
 
         plt.xlabel("Predictions")
         plt.ylabel("Frequency")
 
         plt.legend(loc="upper left", bbox_to_anchor=(1, 1))
-        plt.title("Histogram of Predictions")
+        plt.title(f"Histogram of Predictions TS:{self.threshold:.2f}")
 
         if save_path:
-            plt.savefig(f"{save_path}/hist.png", bbox_inches="tight")
+            plt.savefig(f"{save_path}/hist_{self.threshold:.2f}.png", bbox_inches="tight")
         plt.show()
 
     def show_pdf(self, save_path=None):
@@ -73,10 +73,10 @@ class Evaluator:
         plt.ylabel("Probability Density Function")
 
         plt.legend(loc="upper left", bbox_to_anchor=(1, 1))
-        plt.title("Probability Density Function of Predictions")
+        plt.title(f"Probability Density Function of Predictions TS:{self.threshold:.2f}")
 
         if save_path:
-            plt.savefig(f"{save_path}/pdf.png", bbox_inches="tight")
+            plt.savefig(f"{save_path}/pdf_{self.threshold:.2f}.png", bbox_inches="tight")
         plt.show()
 
     def show_hist_and_pdf(self, save_path=None):
@@ -86,7 +86,7 @@ class Evaluator:
         # Hist
         ax1.hist(self.__negative_preds, bins=self.__bins, alpha=0.5, label="Label Negative Hist", color="green", edgecolor="black", rwidth=0.8)
         ax1.hist(self.__positive_preds, bins=self.__bins, alpha=0.5, label="Label Positive Hist", color="red", edgecolor="black", rwidth=0.8)
-        ax1.axvline(self.threshold, color="k", linestyle="dashed", linewidth=1)
+        ax1.axvline(self.threshold, color="gray", linestyle="dashed", linewidth=1)
 
         ax1.set_xlabel("Predictions")
         ax1.set_ylabel("Frequency", color="blue")
@@ -104,13 +104,13 @@ class Evaluator:
         # Title and show
         ax1.legend(loc="center left", bbox_to_anchor=(1.2, 0.6))
         ax2.legend(loc="center left", bbox_to_anchor=(1.2, 0.4))
-        plt.title("Histogram and Probability Density Function of Predictions")
+        plt.title(f"Histogram and Probability Density Function of Predictions TS:{self.threshold:.2f}")
 
         if save_path:
-            plt.savefig(f"{save_path}/hist_and_pdf.png", bbox_inches="tight")
+            plt.savefig(f"{save_path}/hist_and_pdf_{self.threshold:.2f}.png", bbox_inches="tight")
         plt.show()
 
-    def show_confusion_matrix_and_metrics(self, save_path=None) -> pd.DataFrame:
+    def show_confusion_matrix_and_metrics(self, save_path=None) -> None:
         df = pd.DataFrame(
             {
                 "": [
@@ -146,12 +146,20 @@ class Evaluator:
             }
         ).set_index("")
 
+        _, ax = plt.subplots(figsize=(10,2))
+        ax.axis("off")
+        col_text = df.reset_index().values
+        col_labels = [''] + list(df.columns)
+        ax.table(cellText=col_text, colLabels=col_labels, loc="center", bbox=[0, 0, 1, 1])
+
+        plt.title(f"Confusion Matrix and Metrics TS:{self.threshold:.2f}")
+
         if save_path:
-            df.to_csv(f"{save_path}/confusion_matrix_and_metrics_result.csv")
-        return df
+            plt.savefig(f"{save_path}/confusion_matrix_and_metrics_{self.threshold:.2f}.png", bbox_inches="tight")
+        plt.show()
 
     @staticmethod
-    def show_confusion_matrix_and_metrics_define(save_path=None) -> pd.DataFrame:
+    def show_confusion_matrix_and_metrics_define(save_path=None) -> None:
         df = pd.DataFrame(
             {
                 "": [
@@ -187,9 +195,17 @@ class Evaluator:
             }
         ).set_index("")
 
+        _, ax = plt.subplots(figsize=(40,2))
+        ax.axis("off")
+        col_text = df.reset_index().to_numpy()
+        col_labels = [''] + list(df.columns)
+        ax.table(cellText=col_text, colLabels=col_labels, loc="center", bbox=[0, 0, 1, 1])
+
+        plt.title("Confusion Matrix and Metrics Define")
+
         if save_path:
-            df.to_csv(f"{save_path}/confusion_matrix_and_metrics_define.csv")
-        return df
+            plt.savefig(f"{save_path}/confusion_matrix_and_metrics_define.png", bbox_inches="tight")
+        plt.show()
 
     @staticmethod
     def __calcu_for_hist(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -197,8 +213,8 @@ class Evaluator:
         max_pred = df["pred"].max()
         bins = np.linspace(min_pred, max_pred, 30)
 
-        negative_preds = df[df["label"] == 0]["pred"].values
-        positive_preds = df[df["label"] == 1]["pred"].values
+        negative_preds = df[df["label"] == 0]["pred"].to_numpy()
+        positive_preds = df[df["label"] == 1]["pred"].to_numpy()
         return bins, negative_preds, positive_preds
 
     def __calcu_for_pdf(self, df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -209,8 +225,8 @@ class Evaluator:
         weight_negative = len(negative_df) / total_samples
         weight_positive = len(positive_df) / total_samples
 
-        negative_mean, negative_std = self.__get_mean_and_std(values=negative_df["pred"].values)
-        positive_mean, positive_std = self.__get_mean_and_std(values=positive_df["pred"].values)
+        negative_mean, negative_std = self.__get_mean_and_std(values=negative_df["pred"].to_numpy())
+        positive_mean, positive_std = self.__get_mean_and_std(values=positive_df["pred"].to_numpy())
         x_values = np.linspace(min(df["pred"]), max(df["pred"]), 100)
 
         negative_pdf = stats.norm.pdf(x_values, negative_mean, negative_std) * weight_negative
@@ -222,8 +238,8 @@ class Evaluator:
     def __culcu_for_confusion_matrix_and_metrics(
         df: pd.DataFrame,
     ) -> Tuple[int, int, int, int, float, float, float, float, float, float, float, float, float, float]:
-        labels = df["label"].values
-        label_preds = df["label_pred"].values
+        labels = df["label"].to_numpy()
+        label_preds = df["pred_label"].to_numpy()
 
         true_positive = np.sum((labels == 1) & (label_preds == 1))
         true_negative = np.sum((labels == 0) & (label_preds == 0))

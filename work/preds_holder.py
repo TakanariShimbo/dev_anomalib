@@ -1,5 +1,6 @@
 from typing import List
 
+import numpy as np
 import pandas as pd
 import torch
 
@@ -46,6 +47,15 @@ class PredsHolder:
         self.__threshold = threshold.item()
         self.__min = min_val.item()
         self.__max = max_val.item()
+
+    def reset_threshold(self, new_threshold: float) -> None:
+        preds = self.__df[self.__PRED_COLUMN].to_numpy()
+        normalized = ((preds - new_threshold) / (self.__max - self.__min)) + 0.5
+        normalized = np.clip(normalized, 0, 1)
+
+        self.__threshold = new_threshold
+        self.__df[self.__PRED_NORM_COLUMN] = normalized
+        self.__df[self.__PRED_LABEL_COLUMN] = (preds > self.__threshold).astype(bool)
         
     @property
     def dataframe(self) -> pd.DataFrame:
